@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="שלווה - פלטפורמה מובילה למציאת טיפולים ומטפלים הוליסטיים מוסמכים באזור מגוריך להקלה על כאב פיזי ורגשי">
+  <title>שלווה | טיפולים ומטפלים הוליסטיים מוסמכים להקלה על כאב</title>
+
+  <!-- Google Fonts: Assistant & Heebo for high legibility -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@300;400;600;700;800&family=Heebo:wght@400;500;700;900&display=swap" rel="stylesheet">
+
+  <!-- Stylesheets -->
+  <link rel="stylesheet" href="css/claymorphism.css">
+  <link rel="stylesheet" href="css/animations.css">
+  <link rel="stylesheet" href="css/accessibility.css">
+  <link rel="stylesheet" href="css/main.css">
+</head>
+<body>
+
+  <!-- Screen reader accessibility: Skip link -->
+  <a href="#main-content" class="skip-link">דלג לתוכן מרכזי</a>
+
+  <!-- Preloader - Zen Breathing Relaxation Ring -->
+  <div id="preloader" aria-label="טוען את המרחב הטיפולי">
+    <div class="preloader-clay-circle animate-breathe">
+      <div class="preloader-inner-circle"></div>
+    </div>
+    <div style="margin-top: 1.5rem; text-align: center;">
+      <h2 style="font-size: 1.35rem; color: #2E3618; margin-bottom: 0.25rem;">שלווה 🪷</h2>
+      <p style="font-size: 0.95rem; color: #5B5852;">מנשימים רוגע... מתחברים למרחב הטיפולי שלך</p>
+    </div>
+  </div>
+
+  <!-- Header / Navigation -->
+  <header class="site-header">
+    <nav class="navbar-clay container" aria-label="ניווט ראשי">
+      <!-- Logo -->
+      <a href="#" class="brand-logo" data-nav="home" aria-label="שלווה - דף הבית">
+        <div class="brand-icon">🪷</div>
+        <span>שלווה</span>
+      </a>
+
+      <!-- Desktop Nav Links -->
+      <ul class="nav-links">
+        <li>
+          <button class="nav-link-btn active" data-nav="home">דף הבית</button>
+        </li>
+        <li>
+          <button class="nav-link-btn" data-nav="search">חיפוש מטפלים</button>
+        </li>
+        <li>
+          <button class="nav-link-btn" data-nav="smart-match">
+            <span style="color: #4A5822;">✨</span>
+            <span>התאמה חכמה AI</span>
+          </button>
+        </li>
+        <li>
+          <button class="nav-link-btn" data-nav="favorites">
+            <span>מועדפים</span>
+            <span class="nav-badge-count nav-fav-count" style="display: none;">0</span>
+          </button>
+        </li>
+        <li>
+          <button class="nav-link-btn" data-nav="chat">צ'ט אישי</button>
+        </li>
+        <li>
+          <button class="nav-link-btn" data-nav="ai-service">שירות לקוחות AI</button>
+        </li>
+        <li>
+          <button class="nav-link-btn" data-nav="about">אודות</button>
+        </li>
+        <li>
+          <button class="nav-link-btn" data-nav="contact">צור קשר</button>
+        </li>
+      </ul>
+
+      <!-- Action items: Google Auth / Therapist Mode -->
+      <div class="nav-actions">
+        <button class="clay-btn clay-btn-sm clay-btn-primary" data-nav="therapist-edit" title="פרסום וניהול פרופיל מטפל.ת">
+          <span>אני מטפל.ת</span>
+        </button>
+
+        <button class="clay-btn clay-btn-sm" data-open-auth aria-label="התחברות עם גוגל">
+          <span style="font-size: 1.1rem;">👤</span>
+          <span id="nav-user-name">התחברות</span>
+        </button>
+      </div>
+    </nav>
+  </header>
+
+  <!-- Main Content Container for SPA -->
+  <main id="main-content" tabindex="-1">
+    <!-- Populated dynamically by js/app.js -->
+  </main>
+
+  <!-- Footer -->
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div>
+          <div class="brand-logo" style="margin-bottom: 0.85rem;">
+            <div class="brand-icon">🪷</div>
+            <span>שלווה</span>
+          </div>
+          <p style="font-size: 0.95rem; margin-bottom: 1.25rem;">
+            המרחב ההוליסטי המוביל בישראל לחיבור בין מטופלים עם כאב פיזי או רגשי לבין מטפלים מוסמכים ומאומתים, באווירת ספא שלווה ומרגיעה.
+          </p>
+          <div style="display: flex; gap: 0.5rem;">
+            <span class="clay-badge clay-badge-matcha">100% תעודות מאומתות</span>
+            <span class="clay-badge clay-badge-cream">תקן נגישות ישראלי</span>
+          </div>
+        </div>
+
+        <div>
+          <strong style="display: block; font-size: 1.1rem; margin-bottom: 0.85rem;">ניווט מהיר</strong>
+          <ul style="list-style: none; display: flex; flex-direction: column; gap: 0.5rem; font-size: 0.92rem;">
+            <li><a href="#" data-nav="home">דף הבית</a></li>
+            <li><a href="#" data-nav="search">חיפוש וסינון מטפלים</a></li>
+            <li><a href="#" data-nav="smart-match">התאמת AI לכאב</a></li>
+            <li><a href="#" data-nav="ai-service">סוכן שירות לקוחות</a></li>
+            <li><a href="#" data-nav="favorites">מועדפים שמורים</a></li>
+          </ul>
+        </div>
+
+        <div>
+          <strong style="display: block; font-size: 1.1rem; margin-bottom: 0.85rem;">מידע ומשפטי</strong>
+          <ul style="list-style: none; display: flex; flex-direction: column; gap: 0.5rem; font-size: 0.92rem;">
+            <li><a href="#" data-nav="about">אודות שלווה</a></li>
+            <li><a href="#" data-nav="a11y-statement">הצהרת נגישות (WCAG 2)</a></li>
+            <li><a href="#" data-nav="contact">יצירת קשר ופניות</a></li>
+            <li><a href="#" data-nav="therapist-edit">הצטרפות מטפלים</a></li>
+          </ul>
+        </div>
+
+        <div>
+          <strong style="display: block; font-size: 1.1rem; margin-bottom: 0.85rem;">שירות ותמיכה</strong>
+          <p style="font-size: 0.9rem; margin-bottom: 0.75rem;">
+            מוקד אנושי: 03-555-8290<br />
+            ימים א'-ה' 08:30-18:00<br />
+            מענה AI זמין 24 שעות ביממה
+          </p>
+          <button class="clay-btn clay-btn-sm clay-btn-aqua" data-nav="ai-service">
+            <span>שיחה עם לוטוס AI</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        <div>© 2026 שלווה (Shalva) - כל הזכויות שמורות. מעוצב בסגנון Claymorphism בהתאם לעקרונות נילסן.</div>
+        <div>
+          <a href="#" data-nav="a11y-statement" style="text-decoration: underline; margin-left: 1rem;">הצהרת נגישות</a>
+          <span>תקן ישראלי ת"י 5568 ברמה AA</span>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Fixed Mobile Bottom Navigation Bar (Thumb Friendly) -->
+  <aside class="mobile-bottom-nav" aria-label="ניווט נייד תחתון">
+    <div class="mobile-nav-items">
+      <button class="mobile-nav-btn active" data-nav="home">
+        <span style="font-size: 1.25rem;">🏠</span>
+        <span>ראשי</span>
+      </button>
+      <button class="mobile-nav-btn" data-nav="search">
+        <span style="font-size: 1.25rem;">🔍</span>
+        <span>חיפוש</span>
+      </button>
+      <button class="mobile-nav-btn" data-nav="smart-match">
+        <span style="font-size: 1.25rem;">✨</span>
+        <span>התאמה</span>
+      </button>
+      <button class="mobile-nav-btn" data-nav="chat">
+        <span style="font-size: 1.25rem;">💬</span>
+        <span>צ'ט</span>
+      </button>
+      <button class="mobile-nav-btn" data-nav="favorites">
+        <span style="font-size: 1.25rem;">🤍</span>
+        <span>מועדפים</span>
+      </button>
+    </div>
+  </aside>
+
+  <!-- Sticky Accessibility Trigger Button (Bottom-Right as requested!) -->
+  <button id="a11y-trigger-btn" 
+          class="a11y-floating-trigger" 
+          onclick="a11yController.toggleModal()" 
+          title="סרגל נגישות (Alt + A)" 
+          aria-label="פתח סרגל נגישות" 
+          aria-expanded="false" 
+          aria-controls="a11y-panel">
+    <span style="font-size: 1.65rem;" aria-hidden="true">♿</span>
+  </button>
+
+  <!-- Accessibility Panel Modal Overlay -->
+  <div id="a11y-overlay" class="a11y-modal-overlay" onclick="a11yController.closeModal()"></div>
+
+  <!-- Accessibility Toolbar Panel -->
+  <aside id="a11y-panel" class="a11y-panel" role="dialog" aria-modal="true" aria-labelledby="a11y-panel-title" aria-hidden="true">
+    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem;">
+      <h2 id="a11y-panel-title" style="font-size: 1.25rem; display: flex; align-items: center; gap: 0.5rem;">
+        <span>♿</span>
+        <span>סרגל נגישות</span>
+      </h2>
+      <button class="modal-close-btn" onclick="a11yController.closeModal()" aria-label="סגור תפריט נגישות">✕</button>
+    </div>
+
+    <!-- Font Size Controller -->
+    <div style="background: #F1EFEA; padding: 0.85rem; border-radius: 18px; margin-bottom: 1rem;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem; font-size: 0.88rem; font-weight: 700;">
+        <span>גודל טקסט:</span>
+        <span id="a11y-font-indicator">רגיל</span>
+      </div>
+      <div style="display: flex; gap: 0.4rem;">
+        <button class="clay-btn clay-btn-sm" style="flex: 1;" onclick="a11yController.changeFontSize('increase')" aria-label="הגדל טקסט">A+</button>
+        <button class="clay-btn clay-btn-sm" style="flex: 1;" onclick="a11yController.changeFontSize('reset')" aria-label="איפוס גודל טקסט">איפוס</button>
+        <button class="clay-btn clay-btn-sm" style="flex: 1;" onclick="a11yController.changeFontSize('decrease')" aria-label="הקטן טקסט">A-</button>
+      </div>
+    </div>
+
+    <!-- Accessibility Tools Grid -->
+    <div class="a11y-grid">
+      <button class="a11y-tool-btn" data-a11y-toggle="highContrast" onclick="a11yController.toggleFeature('highContrast')">
+        <span style="font-size: 1.3rem;">🌓</span>
+        <span>ניגודיות גבוהה</span>
+      </button>
+
+      <button class="a11y-tool-btn" data-a11y-toggle="invert" onclick="a11yController.toggleFeature('invert')">
+        <span style="font-size: 1.3rem;">🔄</span>
+        <span>צבעים הפוכים</span>
+      </button>
+
+      <button class="a11y-tool-btn" data-a11y-toggle="grayscale" onclick="a11yController.toggleFeature('grayscale')">
+        <span style="font-size: 1.3rem;">⚪</span>
+        <span>גווני אפור</span>
+      </button>
+
+      <button class="a11y-tool-btn" data-a11y-toggle="highlightLinks" onclick="a11yController.toggleFeature('highlightLinks')">
+        <span style="font-size: 1.3rem;">🔗</span>
+        <span>הדגשת קישורים</span>
+      </button>
+
+      <button class="a11y-tool-btn" data-a11y-toggle="visibleFocus" onclick="a11yController.toggleFeature('visibleFocus')">
+        <span style="font-size: 1.3rem;">🎯</span>
+        <span>פוקוס בולט</span>
+      </button>
+
+      <button class="a11y-tool-btn" data-a11y-toggle="dyslexiaFont" onclick="a11yController.toggleFeature('dyslexiaFont')">
+        <span style="font-size: 1.3rem;">🔤</span>
+        <span>גופן קריא</span>
+      </button>
+
+      <button class="a11y-tool-btn" data-a11y-toggle="reducedMotion" onclick="a11yController.toggleFeature('reducedMotion')">
+        <span style="font-size: 1.3rem;">⏹️</span>
+        <span>עצירת אנימציות</span>
+      </button>
+
+      <button class="a11y-tool-btn" data-a11y-toggle="readingGuide" onclick="a11yController.toggleFeature('readingGuide')">
+        <span style="font-size: 1.3rem;">📏</span>
+        <span>סרגל קריאה</span>
+      </button>
+
+      <button class="a11y-tool-btn" data-a11y-toggle="bigCursor" onclick="a11yController.toggleFeature('bigCursor')">
+        <span style="font-size: 1.3rem;">🖱️</span>
+        <span>סמן מוגדל</span>
+      </button>
+
+      <button class="a11y-tool-btn" onclick="a11yController.resetAll()">
+        <span style="font-size: 1.3rem;">♻️</span>
+        <span>איפוס הכל</span>
+      </button>
+    </div>
+
+    <!-- Direct statement link -->
+    <div style="margin-top: 1rem; border-top: 1px solid rgba(128,126,121,0.15); padding-top: 0.85rem; text-align: center;">
+      <a href="#" data-nav="a11y-statement" onclick="a11yController.closeModal()" style="font-size: 0.9rem; font-weight: 700; text-decoration: underline;">
+        צפייה בהצהרת הנגישות המלאה 📜
+      </a>
+    </div>
+  </aside>
+
+  <!-- Appointment Booking Modal -->
+  <div id="booking-modal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="booking-modal-title">
+    <div class="modal-clay-window">
+      <div class="modal-header">
+        <h2 id="booking-modal-title" style="font-size: 1.4rem;">שריון מועד לטיפול</h2>
+        <button class="modal-close-btn" onclick="document.getElementById('booking-modal').classList.remove('active');" aria-label="סגור חלון">✕</button>
+      </div>
+      <div id="booking-modal-body">
+        <!-- Rendered by app.js openBookingModal -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Google Auth & Switch Role Modal -->
+  <div id="auth-modal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="auth-modal-title">
+    <div class="modal-clay-window" style="max-width: 480px;">
+      <div class="modal-header">
+        <h2 id="auth-modal-title" style="font-size: 1.35rem;">התחברות וניהול חשבון</h2>
+        <button class="modal-close-btn" onclick="document.getElementById('auth-modal').classList.remove('active');" aria-label="סגור חלון">✕</button>
+      </div>
+      <div style="text-align: center; margin-bottom: 1.5rem;">
+        <div style="font-size: 3rem; margin-bottom: 0.5rem;">🪷</div>
+        <p style="font-size: 0.95rem; color: var(--color-text-muted);">
+          התחברות מהירה ומאובטחת עם חשבון גוגל לניהול מועדפים, צ'ט עם מטפלים ותיאום פגישות
+        </p>
+      </div>
+
+      <!-- Google Sign In Button -->
+      <button class="clay-btn" style="width: 100%; padding: 0.9rem; margin-bottom: 1.5rem; background: #FFFFFF; border: 1px solid #E0E0E0;" onclick="
+        document.getElementById('auth-modal').classList.remove('active');
+        app.showToast('התחברת בהצלחה באמצעות Google! שלום נועה 🌿');
+        document.getElementById('nav-user-name').textContent = 'נועה שחר';
+      ">
+        <svg width="20" height="20" viewBox="0 0 24 24" style="margin-left: 8px;">
+          <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+          <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+          <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+          <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+        </svg>
+        <span style="font-weight: 700; color: #444;">התחברות באמצעות Google</span>
+      </button>
+
+      <!-- Role Switch Mockup -->
+      <div style="border-top: 1px dashed rgba(128,126,121,0.2); padding-top: 1.25rem;">
+        <strong style="display: block; font-size: 0.9rem; margin-bottom: 0.65rem;">החלפת מצב משתמש (סימולציה):</strong>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
+          <button class="clay-btn clay-btn-sm clay-btn-matcha" onclick="
+            appState.set('currentUser', { isLoggedIn: true, name: 'נועה שחר', role: 'patient' });
+            document.getElementById('nav-user-name').textContent = 'נועה שחר';
+            document.getElementById('auth-modal').classList.remove('active');
+            app.showToast('עברת למצב: מטופל/ת 🌿');
+          ">
+            <span>מצב מטופל.ת</span>
+          </button>
+
+          <button class="clay-btn clay-btn-sm clay-btn-rose" onclick="
+            appState.set('currentUser', { isLoggedIn: true, name: 'מאיה שפירא (מטפלת)', role: 'therapist' });
+            document.getElementById('nav-user-name').textContent = 'מאיה (מטפלת)';
+            document.getElementById('auth-modal').classList.remove('active');
+            app.navigate('therapist-edit');
+            app.showToast('עברת למצב: מטפל.ת מוסמכ.ת ✨');
+          ">
+            <span>מצב מטפל.ת</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Live Toast Notification Container -->
+  <div id="app-toast" class="toast-clay" role="alert" aria-live="assertive"></div>
+
+  <!-- Scripts -->
+  <script src="js/data.js"></script>
+  <script src="js/state.js"></script>
+  <script src="js/accessibility.js"></script>
+  <script src="js/ai-matching.js"></script>
+  <script src="js/ai-service.js"></script>
+  <script src="js/chat.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

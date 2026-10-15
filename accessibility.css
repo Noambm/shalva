@@ -1,0 +1,251 @@
+/* ==========================================================================
+   Accessibility Stylesheet (WCAG 2.1 AA/AAA & Israeli Standard 5568)
+   Sticky Floating Toolbar, High Contrast, Dyslexia Font, Focus Indicators
+   ========================================================================== */
+
+/* Skip to content link */
+.skip-link {
+  position: absolute;
+  top: -100px;
+  right: 20px;
+  background: #2C2B29;
+  color: #FFFFFF;
+  padding: 12px 20px;
+  border-radius: 8px;
+  font-weight: 700;
+  z-index: 100000;
+  text-decoration: underline;
+  transition: top 0.2s ease;
+}
+
+.skip-link:focus {
+  top: 15px;
+  outline: 3px solid #F6E7C6;
+}
+
+/* Sticky Accessibility Trigger Button (Bottom-Right as requested) */
+.a11y-floating-trigger {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 99990;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #CFD4AE, #AAB27B);
+  color: #1A2408;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid #FFFFFF;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.22), inset 2px 2px 4px rgba(255, 255, 255, 0.8);
+  cursor: pointer;
+  transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.2s ease;
+}
+
+.a11y-floating-trigger:hover {
+  transform: scale(1.08);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.28);
+}
+
+.a11y-floating-trigger:focus-visible {
+  outline: 4px solid #2C2B29;
+  outline-offset: 4px;
+}
+
+/* Accessibility Drawer Modal */
+.a11y-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(44, 43, 41, 0.55);
+  backdrop-filter: blur(4px);
+  z-index: 99995;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.25s ease, visibility 0.25s ease;
+}
+
+.a11y-modal-overlay.active {
+  opacity: 1;
+  visibility: visible;
+}
+
+.a11y-panel {
+  position: fixed;
+  bottom: 90px;
+  right: 24px;
+  width: 360px;
+  max-width: calc(100vw - 32px);
+  max-height: 85vh;
+  overflow-y: auto;
+  background: #FAF8F5;
+  border-radius: 28px;
+  padding: 1.5rem;
+  z-index: 99996;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.25), inset 3px 3px 6px rgba(255, 255, 255, 0.9);
+  border: 1px solid rgba(255, 255, 255, 0.9);
+  transform: translateY(20px) scale(0.96);
+  opacity: 0;
+  visibility: hidden;
+  transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.25s ease, visibility 0.25s ease;
+}
+
+.a11y-panel.active {
+  transform: translateY(0) scale(1);
+  opacity: 1;
+  visibility: visible;
+}
+
+.a11y-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.75rem;
+  margin: 1rem 0;
+}
+
+.a11y-tool-btn {
+  background: #F1EFEA;
+  border: 1.5px solid #E3E1DB;
+  border-radius: 16px;
+  padding: 0.85rem 0.6rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  font-family: inherit;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #2C2B29;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 2px 2px 6px rgba(0, 0, 0, 0.05);
+}
+
+.a11y-tool-btn:hover {
+  background: #E8CCC5;
+  transform: translateY(-2px);
+}
+
+.a11y-tool-btn.active {
+  background: #CFD4AE;
+  border-color: #8D9957;
+  color: #1A2408;
+  font-weight: 700;
+  box-shadow: inset 2px 2px 4px rgba(0, 0, 0, 0.15);
+}
+
+.a11y-tool-btn:focus-visible {
+  outline: 3px solid #2C2B29;
+}
+
+/* Reading Guide Bar */
+#a11y-reading-guide {
+  position: fixed;
+  left: 0;
+  width: 100%;
+  height: 6px;
+  background-color: #FFD700;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.35);
+  pointer-events: none;
+  z-index: 999999;
+  display: none;
+  transform: translateY(-50%);
+}
+
+/* Big Cursor */
+body.a11y-big-cursor,
+body.a11y-big-cursor * {
+  cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 24 24' fill='%23000' stroke='%23fff' stroke-width='2'%3E%3Cpath d='M3 3l7.07 16.97 2.51-7.39 7.39-2.51L3 3z'/%3E%3C/svg%3E"), auto !important;
+}
+
+/* ==========================================================================
+   Active Accessibility Modes on Root/Body
+   ========================================================================== */
+
+/* Font Size Scales */
+body.font-size-lg {
+  font-size: 114% !important;
+}
+
+body.font-size-xl {
+  font-size: 128% !important;
+}
+
+body.font-size-sm {
+  font-size: 90% !important;
+}
+
+/* High Contrast Mode */
+body.a11y-high-contrast {
+  --color-clay-bg: #000000 !important;
+  --color-clay-surface: #121212 !important;
+  --color-clay-card: #1A1A1A !important;
+  --color-text-main: #FFFFFF !important;
+  --color-text-muted: #E0E0E0 !important;
+  background-color: #000000 !important;
+  color: #FFFFFF !important;
+}
+
+body.a11y-high-contrast .clay-card,
+body.a11y-high-contrast .clay-btn,
+body.a11y-high-contrast .a11y-panel {
+  background-color: #1A1A1A !important;
+  color: #FFFFFF !important;
+  border: 2px solid #FFFF00 !important;
+  box-shadow: none !important;
+}
+
+body.a11y-high-contrast .clay-btn-primary {
+  background-color: #FFFF00 !important;
+  color: #000000 !important;
+  font-weight: 800 !important;
+}
+
+body.a11y-high-contrast a {
+  color: #00FFFF !important;
+  text-decoration: underline !important;
+}
+
+/* Inverted Colors Mode */
+body.a11y-invert {
+  filter: invert(100%) hue-rotate(180deg) !important;
+  background-color: #000000;
+}
+
+body.a11y-invert img,
+body.a11y-invert video {
+  filter: invert(100%) hue-rotate(180deg) !important;
+}
+
+/* Grayscale Mode */
+body.a11y-grayscale {
+  filter: grayscale(100%) !important;
+}
+
+/* Highlight Links Mode */
+body.a11y-highlight-links a,
+body.a11y-highlight-links button {
+  text-decoration: underline !important;
+  text-decoration-thickness: 3px !important;
+  text-decoration-color: #B87C00 !important;
+  outline: 2px dashed #B87C00 !important;
+}
+
+/* Visible Keyboard Focus Indicator */
+body.a11y-visible-focus *:focus-visible {
+  outline: 4px solid #0056B3 !important;
+  outline-offset: 3px !important;
+  box-shadow: 0 0 10px rgba(0, 86, 179, 0.7) !important;
+}
+
+/* Dyslexia Friendly Readable Font */
+body.a11y-dyslexia-font {
+  font-family: Arial, "Comic Sans MS", Tahoma, sans-serif !important;
+  letter-spacing: 0.08em !important;
+  word-spacing: 0.16em !important;
+  line-height: 1.8 !important;
+}

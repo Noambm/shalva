@@ -1,0 +1,196 @@
+/* ==========================================================================
+   Animations & Micro-interactions - 60FPS Transform/Opacity Only
+   Spa Zen Atmosphere & Full Accessibility Support
+   ========================================================================== */
+
+/* Preloader Breathing Ring Animation */
+@keyframes zenBreath {
+  0%, 100% {
+    transform: scale(0.92);
+    opacity: 0.75;
+  }
+  50% {
+    transform: scale(1.08);
+    opacity: 1;
+  }
+}
+
+@keyframes zenRipple {
+  0% {
+    transform: scale(0.85);
+    opacity: 0.8;
+  }
+  100% {
+    transform: scale(1.4);
+    opacity: 0;
+  }
+}
+
+@keyframes zenFloat {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}
+
+@keyframes fadeInScale {
+  0% {
+    opacity: 0;
+    transform: scale(0.96) translateY(10px);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+@keyframes slideInUp {
+  0% {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes typingDots {
+  0%, 80%, 100% {
+    transform: scale(0.6);
+    opacity: 0.4;
+  }
+  40% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes heartBeat {
+  0% {
+    transform: scale(1);
+  }
+  25% {
+    transform: scale(1.28);
+  }
+  50% {
+    transform: scale(0.95);
+  }
+  75% {
+    transform: scale(1.15);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes aiGlowPulse {
+  0%, 100% {
+    box-shadow: 0 0 15px rgba(207, 212, 174, 0.4), inset 2px 2px 4px rgba(255, 255, 255, 0.8);
+  }
+  50% {
+    box-shadow: 0 0 28px rgba(189, 206, 211, 0.75), inset 2px 2px 4px rgba(255, 255, 255, 0.95);
+  }
+}
+
+/* Application Classes */
+.animate-breathe {
+  animation: zenBreath 4.5s ease-in-out infinite;
+  will-change: transform, opacity;
+}
+
+.animate-float {
+  animation: zenFloat 6s ease-in-out infinite;
+  will-change: transform;
+}
+
+.animate-pulse-ai {
+  animation: aiGlowPulse 3s ease-in-out infinite;
+  will-change: box-shadow;
+}
+
+.animate-fade-in {
+  animation: fadeInScale 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  will-change: transform, opacity;
+}
+
+.animate-slide-up {
+  animation: slideInUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  will-change: transform, opacity;
+}
+
+.heart-pop {
+  animation: heartBeat 0.45s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+/* Typing Indicator in Chats */
+.typing-dots span {
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background-color: var(--color-slate);
+  margin: 0 2px;
+  animation: typingDots 1.4s infinite ease-in-out both;
+  will-change: transform, opacity;
+}
+
+.typing-dots span:nth-child(1) { animation-delay: -0.32s; }
+.typing-dots span:nth-child(2) { animation-delay: -0.16s; }
+.typing-dots span:nth-child(3) { animation-delay: 0s; }
+
+/* Micro-interaction on input validation */
+.field-error-shake {
+  animation: errorShake 0.35s ease-in-out;
+}
+
+@keyframes errorShake {
+  0%, 100% { transform: translateX(0); }
+  20%, 60% { transform: translateX(-6px); }
+  40%, 80% { transform: translateX(6px); }
+}
+
+/* Toast Notification Animation */
+.toast-clay {
+  position: fixed;
+  bottom: 28px;
+  left: 50%;
+  transform: translateX(-50%) translateY(30px);
+  opacity: 0;
+  z-index: 9999;
+  transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.35s ease;
+  pointer-events: none;
+}
+
+.toast-clay.show {
+  transform: translateX(-50%) translateY(0);
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* WCAG Reduced Motion Rule */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  .animate-breathe,
+  .animate-float,
+  .animate-pulse-ai {
+    animation: none !important;
+  }
+}
+
+/* Force Reduced Motion via Accessibility Toolbar */
+body.reduced-motion *,
+body.reduced-motion *::before,
+body.reduced-motion *::after {
+  animation: none !important;
+  transition: none !important;
+}
