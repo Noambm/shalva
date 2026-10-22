@@ -51,6 +51,9 @@
           <button class="nav-link-btn" data-nav="search">חיפוש מטפלים</button>
         </li>
         <li>
+          <button class="nav-link-btn" data-nav="clinics">קליניקות וספא</button>
+        </li>
+        <li>
           <button class="nav-link-btn" data-nav="smart-match">
             <span style="color: #4A5822;">✨</span>
             <span>התאמה חכמה AI</span>
@@ -76,8 +79,12 @@
         </li>
       </ul>
 
-      <!-- Action items: Google Auth / Therapist Mode -->
+      <!-- Action items: Google Auth / Therapist Mode / Clinic Publishing -->
       <div class="nav-actions">
+        <button class="clay-btn clay-btn-sm" data-nav="clinic-publish" title="פרסום קליניקה או מתחם ספא להשכרה">
+          <span>🏰 פרסום ספא/קליניקה</span>
+        </button>
+
         <button class="clay-btn clay-btn-sm clay-btn-primary" data-nav="therapist-edit" title="פרסום וניהול פרופיל מטפל.ת">
           <span>אני מטפל.ת</span>
         </button>
@@ -86,9 +93,55 @@
           <span style="font-size: 1.1rem;">👤</span>
           <span id="nav-user-name">התחברות</span>
         </button>
+
+        <!-- Hamburger Menu Button for Mobile & Tablet -->
+        <button id="mobile-menu-btn" class="clay-btn clay-btn-sm clay-btn-icon mobile-menu-toggle" aria-label="פתח תפריט ניווט" aria-expanded="false" onclick="app.toggleMobileDrawer()">
+          <span style="font-size: 1.25rem;">☰</span>
+        </button>
       </div>
     </nav>
   </header>
+
+  <!-- Mobile & Tablet Navigation Drawer -->
+  <div id="mobile-drawer-overlay" class="mobile-drawer-overlay" onclick="app.closeMobileDrawer()"></div>
+  <aside id="mobile-drawer" class="mobile-drawer" aria-label="תפריט ניווט למובייל ולטאבלט">
+    <div class="mobile-drawer-header">
+      <div class="brand-logo">
+        <div class="brand-icon">🪷</div>
+        <span>שלווה</span>
+      </div>
+      <button class="modal-close-btn" onclick="app.closeMobileDrawer()" aria-label="סגור תפריט">✕</button>
+    </div>
+
+    <div class="mobile-drawer-user">
+      <span style="font-size: 1.6rem;">👤</span>
+      <div>
+        <strong id="mobile-drawer-username">נועה שחר</strong>
+        <span style="display: block; font-size: 0.8rem; color: var(--color-text-muted);">מחובר/ת במערכת שלווה</span>
+      </div>
+    </div>
+
+    <ul class="mobile-drawer-links">
+      <li><button class="mobile-drawer-link-btn" data-nav="home" onclick="app.closeMobileDrawer()">🏠 דף הבית</button></li>
+      <li><button class="mobile-drawer-link-btn" data-nav="search" onclick="app.closeMobileDrawer()">🔍 חיפוש וסינון מטפלים</button></li>
+      <li><button class="mobile-drawer-link-btn" data-nav="clinics" onclick="app.closeMobileDrawer()">🏰 קליניקות ומתחמי ספא</button></li>
+      <li><button class="mobile-drawer-link-btn" data-nav="clinic-publish" onclick="app.closeMobileDrawer()">✨ פרסום קליניקה / ספא להשכרה</button></li>
+      <li><button class="mobile-drawer-link-btn" data-nav="smart-match" onclick="app.closeMobileDrawer()">✨ התאמה חכמה עם AI</button></li>
+      <li><button class="mobile-drawer-link-btn" data-nav="favorites" onclick="app.closeMobileDrawer()">🤍 מועדפים שמורים (<span class="nav-fav-count">0</span>)</button></li>
+      <li><button class="mobile-drawer-link-btn" data-nav="chat" onclick="app.closeMobileDrawer()">💬 צ'ט אישי עם מטפלים</button></li>
+      <li><button class="mobile-drawer-link-btn" data-nav="ai-service" onclick="app.closeMobileDrawer()">🪷 סוכן שירות לקוחות AI</button></li>
+      <li><button class="mobile-drawer-link-btn" data-nav="therapist-edit" onclick="app.closeMobileDrawer()">🌿 אזור מטפלים (ניהול כרטיס אישי)</button></li>
+      <li><button class="mobile-drawer-link-btn" data-nav="about" onclick="app.closeMobileDrawer()">📖 אודות שלווה</button></li>
+      <li><button class="mobile-drawer-link-btn" data-nav="contact" onclick="app.closeMobileDrawer()">✉️ צור קשר</button></li>
+      <li><button class="mobile-drawer-link-btn" data-nav="a11y-statement" onclick="app.closeMobileDrawer()">♿ הצהרת נגישות</button></li>
+    </ul>
+
+    <div style="margin-top: auto; padding-top: 1rem; border-top: 1px dashed rgba(128,126,121,0.2);">
+      <button class="clay-btn clay-btn-primary" style="width: 100%;" data-open-auth onclick="app.closeMobileDrawer()">
+        <span>התחברות / החלפת חשבון</span>
+      </button>
+    </div>
+  </aside>
 
   <!-- Main Content Container for SPA -->
   <main id="main-content" tabindex="-1">
@@ -118,6 +171,8 @@
           <ul style="list-style: none; display: flex; flex-direction: column; gap: 0.5rem; font-size: 0.92rem;">
             <li><a href="#" data-nav="home">דף הבית</a></li>
             <li><a href="#" data-nav="search">חיפוש וסינון מטפלים</a></li>
+            <li><a href="#" data-nav="clinics">קליניקות ומתחמי ספא</a></li>
+            <li><a href="#" data-nav="clinic-publish">פרסום קליניקה או ספא</a></li>
             <li><a href="#" data-nav="smart-match">התאמת AI לכאב</a></li>
             <li><a href="#" data-nav="ai-service">סוכן שירות לקוחות</a></li>
             <li><a href="#" data-nav="favorites">מועדפים שמורים</a></li>

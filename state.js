@@ -15,15 +15,29 @@ class AppStateManager {
         id: 'user-001',
         name: 'נועה שחר',
         email: 'noa.shahar@gmail.com',
+        phone: '054-9876543',
+        city: 'תל אביב-יפו',
+        address: 'רחוב בזל 15, תל אביב',
         avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80',
-        role: 'patient' // 'patient' or 'therapist'
+        role: 'patient', // 'patient' or 'therapist'
+        notes: 'רגישות בעמוד שדרה צווארי, מעדיפה טיפולי דיקור ושיאצו'
       },
       favorites: ['th-1', 'th-4'],
-      activeView: 'home', // 'home', 'search', 'profile', 'smart-match', 'chat', 'ai-service', 'therapist-edit', 'favorites', 'about', 'contact', 'a11y-statement'
+      activeView: 'home', // 'home', 'search', 'profile', 'clinics', 'clinic-publish', 'clinic-profile', 'smart-match', 'chat', 'ai-service', 'therapist-edit', 'favorites', 'about', 'contact', 'a11y-statement'
       selectedTherapistId: null,
+      selectedClinicId: 'clinic-1',
       activeChatTherapistId: 'th-1',
       therapistOnlineOverrides: {
         'th-8': false // Default unavailable
+      },
+      therapistProfiles: {}, // Stores user-edited therapist profiles (e.g. uploaded avatars)
+      customClinics: [], // Stores user-published clinics and spas
+      clinicFilters: {
+        query: '',
+        city: 'all',
+        type: 'all',
+        facility: 'all',
+        maxPrice: 600
       },
       filters: {
         query: '',
@@ -141,6 +155,66 @@ class AppStateManager {
   setTherapistAvailable(therapistId, isAvailable) {
     const overrides = { ...this.state.therapistOnlineOverrides, [therapistId]: isAvailable };
     this.set('therapistOnlineOverrides', overrides);
+  }
+
+  // Get all therapists merged with custom saved profiles (e.g. uploaded avatars)
+  getTherapists() {
+    const base = APP_DATA.therapists || [];
+    const profiles = this.state.therapistProfiles || {};
+    return base.map(th => {
+      if (profiles[th.id]) {
+        return { ...th, ...profiles[th.id] };
+      }
+      return th;
+    });
+  }
+
+  getTherapist(id) {
+    const all = this.getTherapists();
+    return all.find(t => t.id === id) || all[0];
+  }
+
+  // Update a therapist profile and persist in localStorage
+  updateTherapist(therapistId, updatedData) {
+    const profiles = { ...(this.state.therapistProfiles || {}) };
+    profiles[therapistId] = { ...(profiles[therapistId] || {}), ...updatedData };
+    this.set('therapistProfiles', profiles);
+    this.emit('therapist-updated', { therapistId, data: profiles[therapistId] });
+  }
+
+  // Get all clinics (base clinics + user published clinics)
+  getClinics() {
+    const baseClinics = APP_DATA.clinics || [];
+    const customClinics = this.state.customClinics || [];
+    return [...customClinics, ...baseClinics];
+  }
+
+  getClinic(id) {
+    const all = this.getClinics();
+    return all.find(c => c.id === id) || all[0];
+  }
+
+  // Add a new clinic / spa center
+  addClinic(clinicData) {
+    const custom = [...(this.state.customClinics || [])];
+    const newClinic = {
+      id: 'custom-clinic-' + Date.now(),
+      rating: 5.0,
+      reviewsCount: 1,
+      ...clinicData
+    };
+    custom.unshift(newClinic);
+    this.set('customClinics', custom);
+    this.emit('clinic-added', newClinic);
+    return newClinic;
+  }
+
+  // Update current user profile (patient or therapist)
+  updateCurrentUser(userData) {
+    const current = { ...(this.state.currentUser || {}), ...userData };
+    this.set('currentUser', current);
+    this.emit('user-updated', current);
+    return current;
   }
 }
 

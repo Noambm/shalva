@@ -68,10 +68,39 @@ class AppController {
     }, 3200);
   }
 
+  toggleMobileDrawer() {
+    const drawer = document.getElementById('mobile-drawer');
+    const overlay = document.getElementById('mobile-drawer-overlay');
+    const btn = document.getElementById('mobile-menu-btn');
+    if (!drawer) return;
+    const isOpen = drawer.classList.contains('open');
+    if (isOpen) {
+      this.closeMobileDrawer();
+    } else {
+      drawer.classList.add('open');
+      if (overlay) overlay.classList.add('open');
+      if (btn) btn.setAttribute('aria-expanded', 'true');
+      document.body.style.overflow = 'hidden';
+    }
+  }
+
+  closeMobileDrawer() {
+    const drawer = document.getElementById('mobile-drawer');
+    const overlay = document.getElementById('mobile-drawer-overlay');
+    const btn = document.getElementById('mobile-menu-btn');
+    if (drawer) drawer.classList.remove('open');
+    if (overlay) overlay.classList.remove('open');
+    if (btn) btn.setAttribute('aria-expanded', 'false');
+    document.body.style.overflow = '';
+  }
+
   navigate(viewName, params = {}) {
     window.scrollTo({ top: 0, behavior: 'smooth' });
     if (params.therapistId) {
       appState.set('selectedTherapistId', params.therapistId);
+    }
+    if (params.clinicId) {
+      appState.set('selectedClinicId', params.clinicId);
     }
     appState.set('activeView', viewName);
   }
@@ -93,7 +122,8 @@ class AppController {
         e.preventDefault();
         const view = navTarget.getAttribute('data-nav');
         const thId = navTarget.getAttribute('data-therapist-id');
-        this.navigate(view, { therapistId: thId });
+        const clinicId = navTarget.getAttribute('data-clinic-id');
+        this.navigate(view, { therapistId: thId, clinicId: clinicId });
       }
 
       // Favorite toggle button
@@ -159,6 +189,18 @@ class AppController {
         mainEl.innerHTML = this.renderSearchView();
         this.bindSearchEvents();
         break;
+      case 'clinics':
+        mainEl.innerHTML = this.renderClinicsView();
+        this.bindClinicsEvents();
+        break;
+      case 'clinic-profile':
+        mainEl.innerHTML = this.renderClinicProfileView();
+        this.bindClinicProfileEvents();
+        break;
+      case 'clinic-publish':
+        mainEl.innerHTML = this.renderClinicPublishView();
+        this.bindClinicPublishEvents();
+        break;
       case 'profile':
         mainEl.innerHTML = this.renderProfileView();
         this.bindProfileEvents();
@@ -202,7 +244,7 @@ class AppController {
      1. Home Screen
      ======================================================================== */
   renderHomeView() {
-    const topTherapists = APP_DATA.therapists.slice(0, 4);
+    const topTherapists = (appState.getTherapists() || []).slice(0, 4);
 
     return `
       <!-- Hero Section -->
@@ -328,6 +370,32 @@ class AppController {
 
         <div class="therapist-grid">
           ${topTherapists.map(th => this.renderTherapistCard(th)).join('')}
+        </div>
+      </section>
+
+      <!-- Clinics and Spa Highlight Banner -->
+      <section class="container" style="padding: 1.5rem 0 2.5rem;">
+        <div class="clinics-hero-banner" style="margin-bottom: 0;">
+          <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1.5rem;">
+            <div>
+              <span class="clay-badge clay-badge-matcha" style="margin-bottom: 0.75rem;">🏰 חדש: מרחבי טיפול וספא בישראל</span>
+              <h2 style="margin-bottom: 0.6rem;">מחפשים קליניקה מאובזרת או מתחם ספא שליו?</h2>
+              <p style="font-size: 1.05rem; max-width: 620px; margin-bottom: 1.25rem;">
+                מאגר מתחמי הספא והקליניקות השיתופיות המובילים בארץ. חדרי טיפול שקטים ומאובזרים לפי שעה למטפלים, וחבילות ספא מפנקות ומבריאות למטופלים.
+              </p>
+              <div style="display: flex; gap: 0.85rem; flex-wrap: wrap;">
+                <button class="clay-btn clay-btn-primary" data-nav="clinics">
+                  <span>🏰 גלו קליניקות ומתחמי ספא</span>
+                </button>
+                <button class="clay-btn" data-nav="clinic-publish">
+                  <span>✨ פרסום קליניקה / ספא חדש</span>
+                </button>
+              </div>
+            </div>
+            <div style="font-size: 5rem; user-select: none;" aria-hidden="true">
+              🧖‍♀️
+            </div>
+          </div>
         </div>
       </section>
 
@@ -483,7 +551,7 @@ class AppController {
      ======================================================================== */
   renderSearchView() {
     const filters = appState.get('filters');
-    let therapists = APP_DATA.therapists;
+    let therapists = appState.getTherapists();
 
     // Filter by query
     if (filters.query && filters.query.trim()) {
@@ -787,7 +855,7 @@ class AppController {
      ======================================================================== */
   renderProfileView() {
     const thId = appState.get('selectedTherapistId') || 'th-1';
-    const th = APP_DATA.therapists.find(t => t.id === thId) || APP_DATA.therapists[0];
+    const th = appState.getTherapist(thId);
     const isFav = appState.isFavorite(th.id);
     const isOnline = appState.isTherapistAvailable(th.id);
 
@@ -1012,7 +1080,7 @@ class AppController {
         }
 
         const thId = appState.get('selectedTherapistId') || 'th-1';
-        const th = APP_DATA.therapists.find(t => t.id === thId);
+        const th = appState.getTherapist(thId);
         if (th) {
           th.reviews.unshift({
             author: author || 'מטופל מאומת',
@@ -1289,7 +1357,7 @@ class AppController {
      ======================================================================== */
   renderChatView() {
     const activeThId = chatManager.activeTherapistId;
-    const therapist = APP_DATA.therapists.find(t => t.id === activeThId) || APP_DATA.therapists[0];
+    const therapist = appState.getTherapist(activeThId);
     const messages = chatManager.getMessages(activeThId);
     const convs = chatManager.getConversations();
     const isOnline = appState.isTherapistAvailable(activeThId);
@@ -1304,7 +1372,7 @@ class AppController {
               <span style="font-size: 0.8rem; color: var(--color-text-muted);">התכתבות ישירה עם מטפלים</span>
             </div>
             <div class="chat-thread-list">
-              ${APP_DATA.therapists.slice(0, 4).map(t => {
+              ${(appState.getTherapists() || []).slice(0, 4).map(t => {
                 const threadMsgs = convs[t.id] || [];
                 const lastMsg = threadMsgs[threadMsgs.length - 1]?.text || 'אין הודעות קודמות';
                 const isActive = t.id === activeThId;
@@ -1558,16 +1626,28 @@ class AppController {
      ======================================================================== */
   renderTherapistEditView() {
     const isAvailable = appState.isTherapistAvailable('th-1');
+    const th = appState.getTherapist('th-1') || {
+      id: 'th-1',
+      name: 'מאיה שפירא',
+      title: 'מומחית לרפואה סינית מסורתית (TCM) ודיקור יפני עדין',
+      avatar: 'https://images.unsplash.com/photo-1594824813593-9c884617508f?auto=format&fit=crop&w=400&q=80',
+      city: 'תל אביב',
+      hourlyRate: 320,
+      experienceYears: 12,
+      mobility: 'both',
+      bio: 'מטפלת מוסמכת מטעם מכללת רידמן והתמחות קלינית בבית החולים צ\'נגדו בסין. מתמחה במטופלים המתמודדים עם כאבי גב כרוניים, פריצות דיסק, פיברומיאלגיה ומיגרנות חריפות.',
+      weekendAvailability: true
+    };
 
     return `
-      <div class="container" style="padding: 2rem 0 4rem; max-width: 780px;">
+      <div class="container" style="padding: 2rem 0 4rem; max-width: 820px;">
         <div style="margin-bottom: 2rem;">
           <span class="clay-badge clay-badge-matcha" style="margin-bottom: 0.5rem;">אזור מטפלים מוסמכים</span>
-          <h1>ניהול ויצירת פרופיל מטפל.ת</h1>
-          <p>עדכון פרטים מקצועיים, ניהול זמינות לקבלת פניות, ותעריפי טיפול</p>
+          <h1>ניהול ויצירת כרטיס מטפל.ת אישי</h1>
+          <p>העלאת תמונת פרופיל מהמחשב או מהענן, ניהול זמינות לקבלת פניות, ועדכון פרטי טיפול</p>
         </div>
 
-        <!-- Availability Toggle Card (Core Requirement) -->
+        <!-- Availability Toggle Card -->
         <div class="clay-card clay-card-matcha" style="padding: 1.75rem; margin-bottom: 2rem;">
           <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem;">
             <div>
@@ -1590,41 +1670,105 @@ class AppController {
         </div>
 
         <!-- Profile Form -->
-        <form id="therapist-edit-form" class="clay-card" style="padding: 2.2rem; display: flex; flex-direction: column; gap: 1.5rem;" novalidate>
-          <div style="display: flex; gap: 1.5rem; align-items: center; flex-wrap: wrap;">
-            <img src="https://images.unsplash.com/photo-1594824813593-9c884617508f?auto=format&fit=crop&w=400&q=80" 
-                 alt="תמונת הפרופיל שלך" 
-                 style="width: 90px; height: 90px; border-radius: 50%; object-fit: cover; box-shadow: var(--clay-box-shadow);" />
+        <form id="therapist-edit-form" class="clay-card" style="padding: 2.2rem; display: flex; flex-direction: column; gap: 1.75rem;" novalidate>
+          
+          <!-- Image Uploader Section (Local Computer / Cloud / Presets) -->
+          <div class="avatar-uploader-card">
+            <div style="margin-bottom: 1rem;">
+              <strong style="font-size: 1.15rem; display: block; margin-bottom: 0.25rem;">
+                📸 תמונת כרטיס אישי ופרופיל
+              </strong>
+              <p style="font-size: 0.9rem; color: var(--color-text-muted);">
+                העלו תמונה אישית ברורה. באפשרותכם לבחור קובץ מהמחשב/נייד, להדביק קישור מענן (Google Drive, iCloud, Dropbox), או לבחור מגלריית שלווה.
+              </p>
+            </div>
+
+            <div class="avatar-preview-container">
+              <div class="avatar-large-preview" id="th-avatar-preview-wrap" title="לחצו לבחירת תמונה מהמחשב">
+                <img id="th-avatar-preview" src="${th.avatar}" alt="תמונת כרטיס אישי" />
+                <div class="avatar-large-preview-overlay">
+                  <span style="font-size: 1.25rem;">📷</span>
+                  <span>החלף תמונה</span>
+                </div>
+              </div>
+
+              <!-- Hidden input for file selection -->
+              <input type="file" id="th-avatar-file-input" accept="image/png, image/jpeg, image/webp, image/gif" style="display: none;" />
+              <input type="hidden" id="th-avatar-value" value="${th.avatar}" />
+
+              <div style="flex: 1; display: flex; flex-direction: column; gap: 0.65rem;">
+                <div style="display: flex; gap: 0.65rem; flex-wrap: wrap;">
+                  <button type="button" class="clay-btn clay-btn-primary" id="btn-browse-computer" style="display: inline-flex; align-items: center; gap: 0.45rem;">
+                    <span>💻</span>
+                    <span>בחירת תמונה מהמחשב / נייד</span>
+                  </button>
+                  <button type="button" class="clay-btn" id="btn-reset-avatar" style="font-size: 0.85rem;">
+                    <span>↺ שחזר ברירת מחדל</span>
+                  </button>
+                </div>
+                <div id="avatar-feedback" style="font-size: 0.85rem; font-weight: 700; color: #2D5827; min-height: 1.2rem;"></div>
+              </div>
+            </div>
+
+            <!-- Drag & Drop Zone -->
+            <div id="th-avatar-dropzone" class="avatar-dropzone" style="margin-bottom: 1.25rem;">
+              <span style="font-size: 1.6rem; display: block; margin-bottom: 0.25rem;">📥</span>
+              <strong style="font-size: 0.95rem; display: block;">או גררו תמונה מהמחשב לכאן</strong>
+              <span style="font-size: 0.82rem; color: var(--color-text-muted);">תמיכה בפורמטים JPG, PNG, WebP (התמונה תותאם אוטומטית)</span>
+            </div>
+
+            <!-- Cloud / Web Image Link -->
+            <div style="background: rgba(255, 255, 255, 0.7); padding: 1.1rem; border-radius: 18px; margin-bottom: 1.25rem;">
+              <label for="th-cloud-url-input" style="font-weight: 700; font-size: 0.9rem; display: block; margin-bottom: 0.4rem;">
+                ☁️ העלאה מענן אישי או קישור ישיר לתמונה (Google Drive, Dropbox, קישור אינטרנט)
+              </label>
+              <div class="cloud-url-box">
+                <input type="url" id="th-cloud-url-input" class="clay-input" placeholder="https://drive.google.com/... או קישור ישיר לתמונה" />
+                <button type="button" class="clay-btn" id="btn-load-cloud-url">
+                  <span>טען מהענן</span>
+                </button>
+              </div>
+              <span style="display: block; font-size: 0.78rem; color: var(--color-text-muted); margin-top: 0.35rem;">
+                טיפ: עבור קישור Google Drive יש לוודא שהשיתוף פתוח לצפייה ("כל מי שיש לו את הקישור").
+              </span>
+            </div>
+
+            <!-- Presets Gallery -->
             <div>
-              <strong style="display: block; margin-bottom: 0.35rem;">תמונת פרופיל מקצועית</strong>
-              <button type="button" class="clay-btn clay-btn-sm" onclick="alert('בחר תמונה מהמכשיר שלך להעלאה');">
-                <span>החלף תמונה</span>
-              </button>
+              <strong style="font-size: 0.9rem; display: block; margin-bottom: 0.45rem;">
+                🎭 או בחרו תמונה מקצועית מוכנה מגלריית שלווה:
+              </strong>
+              <div class="avatar-presets-scroll" id="avatar-presets-list">
+                ${(APP_DATA.presetAvatars || []).map(url => `
+                  <button type="button" class="avatar-preset-btn ${url === th.avatar ? 'active' : ''}" data-preset-avatar="${url}" title="בחר תמונה זו">
+                    <img src="${url}" alt="אווטאר מוכן" />
+                  </button>
+                `).join('')}
+              </div>
             </div>
           </div>
 
           <!-- Name -->
           <div>
             <label class="filter-label" for="th-name-input">שם מלא *</label>
-            <input type="text" id="th-name-input" class="clay-input" value="מאיה שפירא" required />
-            <span class="field-error-hint" style="color: var(--color-danger); font-size: 0.8rem; display: none;">נא להזין שם מלא</span>
+            <input type="text" id="th-name-input" class="clay-input" value="${th.name}" required />
           </div>
 
           <!-- Title -->
           <div>
             <label class="filter-label" for="th-title-input">כותרת מקצועית והתמחויות *</label>
-            <input type="text" id="th-title-input" class="clay-input" value="מומחית לרפואה סינית מסורתית (TCM) ודיקור יפני עדין" required />
+            <input type="text" id="th-title-input" class="clay-input" value="${th.title}" required />
           </div>
 
           <!-- City & Price -->
           <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
             <div>
               <label class="filter-label" for="th-city-input">עיר הקליניקה *</label>
-              <input type="text" id="th-city-input" class="clay-input" value="תל אביב" required />
+              <input type="text" id="th-city-input" class="clay-input" value="${th.city}" required />
             </div>
             <div>
               <label class="filter-label" for="th-price-input">מחיר מומלץ לשעה (₪) *</label>
-              <input type="number" id="th-price-input" class="clay-input" value="320" min="150" max="800" required />
+              <input type="number" id="th-price-input" class="clay-input" value="${th.hourlyRate}" min="150" max="800" required />
             </div>
           </div>
 
@@ -1632,14 +1776,14 @@ class AppController {
           <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
             <div>
               <label class="filter-label" for="th-exp-input">שנות ניסיון קליני</label>
-              <input type="number" id="th-exp-input" class="clay-input" value="12" min="1" max="50" />
+              <input type="number" id="th-exp-input" class="clay-input" value="${th.experienceYears || 10}" min="1" max="50" />
             </div>
             <div>
               <label class="filter-label" for="th-mobility-select">סוג ניידות</label>
               <select id="th-mobility-select" class="clay-select">
-                <option value="both" selected>גם קליניקה וגם ביקורי בית</option>
-                <option value="clinic">קליניקה פרטית בלבד</option>
-                <option value="home">מגיע/ה לבית הלקוח בלבד</option>
+                <option value="both" ${th.mobility === 'both' ? 'selected' : ''}>גם קליניקה וגם ביקורי בית</option>
+                <option value="clinic" ${th.mobility === 'clinic' ? 'selected' : ''}>קליניקה פרטית בלבד</option>
+                <option value="home" ${th.mobility === 'home' ? 'selected' : ''}>מגיע/ה לבית הלקוח בלבד</option>
               </select>
             </div>
           </div>
@@ -1647,18 +1791,18 @@ class AppController {
           <!-- Bio -->
           <div>
             <label class="filter-label" for="th-bio-input">אודות, גישה טיפולית וסוגי כאב בהם את/ה מטפל/ת</label>
-            <textarea id="th-bio-input" class="clay-textarea" rows="4">מטפלת מוסמכת מטעם מכללת רידמן והתמחות קלינית בבית החולים צ'נגדו בסין. מתמחה במטופלים המתמודדים עם כאבי גב כרוניים, פריצות דיסק, פיברומיאלגיה ומיגרנות חריפות.</textarea>
+            <textarea id="th-bio-input" class="clay-textarea" rows="4">${th.bio}</textarea>
           </div>
 
           <!-- Weekend Availability -->
           <label class="clay-switch-label">
-            <input type="checkbox" id="th-weekend-toggle" class="clay-switch-checkbox" checked />
+            <input type="checkbox" id="th-weekend-toggle" class="clay-switch-checkbox" ${th.weekendAvailability ? 'checked' : ''} />
             <div class="clay-switch"><div class="clay-switch-thumb"></div></div>
             <span>זמינ/ה לקבלת מטופלים גם בסופי שבוע (שישי/שבת)</span>
           </label>
 
           <button type="submit" class="clay-btn clay-btn-primary clay-btn-lg" style="margin-top: 1rem;">
-            <span>שמור שינויים בפרופיל</span>
+            <span>שמור שינויים בכרטיס האישי</span>
           </button>
         </form>
       </div>
@@ -1666,6 +1810,7 @@ class AppController {
   }
 
   bindTherapistEditEvents() {
+    // Online toggle
     const toggle = document.getElementById('therapist-online-toggle');
     const statusText = document.getElementById('availability-status-text');
 
@@ -1679,10 +1824,935 @@ class AppController {
       this.showToast(isOnline ? 'הסטטוס שונה: הפרופיל שלך פתוח לפניות מטופלים 🟢' : 'הסטטוס שונה: הינך לא זמין/ה, הפרופיל מוסתר מתוצאות החיפוש 🔴');
     });
 
+    const fileInput = document.getElementById('th-avatar-file-input');
+    const previewWrap = document.getElementById('th-avatar-preview-wrap');
+    const previewImg = document.getElementById('th-avatar-preview');
+    const hiddenValue = document.getElementById('th-avatar-value');
+    const feedback = document.getElementById('avatar-feedback');
+    const dropzone = document.getElementById('th-avatar-dropzone');
+    const browseBtn = document.getElementById('btn-browse-computer');
+    const resetBtn = document.getElementById('btn-reset-avatar');
+    const loadCloudBtn = document.getElementById('btn-load-cloud-url');
+    const cloudInput = document.getElementById('th-cloud-url-input');
+
+    // Trigger file input
+    const triggerFilePick = () => fileInput?.click();
+    previewWrap?.addEventListener('click', triggerFilePick);
+    browseBtn?.addEventListener('click', triggerFilePick);
+    dropzone?.addEventListener('click', triggerFilePick);
+
+    // Image compression via Canvas
+    const handleFile = (file) => {
+      if (!file || !file.type.startsWith('image/')) {
+        this.showToast('נא לבחור קובץ תמונה תקין (JPG, PNG, WebP) ⚠️');
+        return;
+      }
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const img = new Image();
+        img.onload = () => {
+          const maxDim = 480;
+          let width = img.width;
+          let height = img.height;
+          if (width > height) {
+            if (width > maxDim) {
+              height = Math.round((height * maxDim) / width);
+              width = maxDim;
+            }
+          } else {
+            if (height > maxDim) {
+              width = Math.round((width * maxDim) / height);
+              height = maxDim;
+            }
+          }
+          const canvas = document.createElement('canvas');
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, width, height);
+          const compressed = canvas.toDataURL('image/jpeg', 0.82);
+
+          if (previewImg) previewImg.src = compressed;
+          if (hiddenValue) hiddenValue.value = compressed;
+          if (feedback) feedback.textContent = '✓ תמונה נטענה בהצלחה מהמחשב/נייד (' + Math.round(compressed.length / 1024) + ' KB)';
+          document.querySelectorAll('.avatar-preset-btn').forEach(btn => btn.classList.remove('active'));
+          this.showToast('תמונת הכרטיס האישי הועלתה מהמחשב בהצלחה! 📸✨');
+        };
+        img.src = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    };
+
+    fileInput?.addEventListener('change', (e) => {
+      if (e.target.files && e.target.files[0]) {
+        handleFile(e.target.files[0]);
+      }
+    });
+
+    // Drag and drop handlers
+    if (dropzone) {
+      ['dragenter', 'dragover'].forEach(eventName => {
+        dropzone.addEventListener(eventName, (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          dropzone.classList.add('dragover');
+        });
+      });
+
+      ['dragleave', 'drop'].forEach(eventName => {
+        dropzone.addEventListener(eventName, (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          dropzone.classList.remove('dragover');
+        });
+      });
+
+      dropzone.addEventListener('drop', (e) => {
+        if (e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0]) {
+          handleFile(e.dataTransfer.files[0]);
+        }
+      });
+    }
+
+    // Cloud URL Link Loader (with Google Drive / Dropbox conversion)
+    loadCloudBtn?.addEventListener('click', () => {
+      let url = cloudInput ? cloudInput.value.trim() : '';
+      if (!url) {
+        this.showToast('נא להזין קישור לתמונה');
+        return;
+      }
+
+      // Convert Google Drive view link to direct thumbnail link
+      const gDriveMatch = url.match(/\/d\/([a-zA-Z0-9_-]+)/);
+      if (gDriveMatch && gDriveMatch[1]) {
+        url = `https://drive.google.com/thumbnail?id=${gDriveMatch[1]}&sz=w600`;
+      } else if (url.includes('dropbox.com')) {
+        url = url.replace('dl=0', 'raw=1');
+      }
+
+      const testImg = new Image();
+      testImg.onload = () => {
+        if (previewImg) previewImg.src = url;
+        if (hiddenValue) hiddenValue.value = url;
+        if (feedback) feedback.textContent = '✓ תמונה נטענה בהצלחה מקישור הענן!';
+        document.querySelectorAll('.avatar-preset-btn').forEach(btn => btn.classList.remove('active'));
+        this.showToast('התמונה מהענן נטענה בהצלחה! ☁️✨');
+      };
+      testImg.onerror = () => {
+        if (previewImg) previewImg.src = url;
+        if (hiddenValue) hiddenValue.value = url;
+        if (feedback) feedback.textContent = '✓ קישור התמונה נשמר לתצוגה';
+        this.showToast('קישור התמונה נשמר 🌐');
+      };
+      testImg.src = url;
+    });
+
+    // Preset Avatars
+    document.querySelectorAll('[data-preset-avatar]').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.preventDefault();
+        const url = btn.getAttribute('data-preset-avatar');
+        if (previewImg) previewImg.src = url;
+        if (hiddenValue) hiddenValue.value = url;
+        if (feedback) feedback.textContent = '✓ נבחרה תמונה מגלריית שלווה';
+        document.querySelectorAll('.avatar-preset-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        this.showToast('נבחרה תמונה מקצועית מהגלריה! 🌿');
+      });
+    });
+
+    // Reset Avatar
+    resetBtn?.addEventListener('click', () => {
+      const defaultAvatar = 'https://images.unsplash.com/photo-1594824813593-9c884617508f?auto=format&fit=crop&w=400&q=80';
+      if (previewImg) previewImg.src = defaultAvatar;
+      if (hiddenValue) hiddenValue.value = defaultAvatar;
+      if (feedback) feedback.textContent = 'שוחזרה תמונת ברירת המחדל';
+      document.querySelectorAll('.avatar-preset-btn').forEach(b => b.classList.remove('active'));
+      this.showToast('שוחזרה תמונת ברירת המחדל');
+    });
+
+    // Form submit
     const form = document.getElementById('therapist-edit-form');
     form?.addEventListener('submit', (e) => {
       e.preventDefault();
-      this.showToast('פרטי הפרופיל עודכנו בהצלחה במערכת! 🌿');
+      const avatar = hiddenValue ? hiddenValue.value : previewImg.src;
+      const name = document.getElementById('th-name-input').value.trim();
+      const title = document.getElementById('th-title-input').value.trim();
+      const city = document.getElementById('th-city-input').value.trim();
+      const hourlyRate = parseInt(document.getElementById('th-price-input').value, 10) || 320;
+      const experienceYears = parseInt(document.getElementById('th-exp-input').value, 10) || 12;
+      const mobility = document.getElementById('th-mobility-select').value;
+      const bio = document.getElementById('th-bio-input').value.trim();
+      const weekendAvailability = document.getElementById('th-weekend-toggle').checked;
+
+      if (!name || !title || !city) {
+        this.showToast('נא למלא את כל שדות החובה המסומנים בכוכבית (*) ⚠️');
+        return;
+      }
+
+      appState.updateTherapist('th-1', {
+        avatar,
+        name,
+        title,
+        city,
+        hourlyRate,
+        experienceYears,
+        mobility,
+        mobilityLabel: mobility === 'both' ? 'גם קליניקה וגם ביקורי בית' : (mobility === 'clinic' ? 'קליניקה פרטית בלבד' : 'מגיע/ה לבית הלקוח בלבד'),
+        bio,
+        weekendAvailability
+      });
+
+      // Update current user if therapist
+      const curUser = appState.get('currentUser') || {};
+      appState.set('currentUser', {
+        ...curUser,
+        name: name,
+        avatar: avatar
+      });
+
+      this.showToast('הכרטיס האישי שלך נשמר ועודכן בהצלחה בכל האתר! 🌿✨');
+    });
+  }
+
+  /* ========================================================================
+     Clinics & Spas Directory & Advertising System
+     ======================================================================== */
+  renderClinicsView() {
+    const filters = appState.get('clinicFilters') || { query: '', city: 'all', type: 'all', maxPrice: 600 };
+    let clinics = appState.getClinics();
+
+    // Filter by search query
+    if (filters.query && filters.query.trim()) {
+      const q = filters.query.toLowerCase().trim();
+      clinics = clinics.filter(c =>
+        c.name.toLowerCase().includes(q) ||
+        c.city.toLowerCase().includes(q) ||
+        c.description.toLowerCase().includes(q)
+      );
+    }
+
+    // Filter by city
+    if (filters.city && filters.city !== 'all') {
+      clinics = clinics.filter(c => c.city.includes(filters.city));
+    }
+
+    // Filter by type
+    if (filters.type && filters.type !== 'all') {
+      clinics = clinics.filter(c => c.type === filters.type);
+    }
+
+    // Filter by max hourly rent
+    if (filters.maxPrice && filters.maxPrice < 600) {
+      clinics = clinics.filter(c => (c.hourlyRent || 0) <= filters.maxPrice);
+    }
+
+    return `
+      <div class="container" style="padding: 2rem 0 4rem;">
+        <!-- Hero Header -->
+        <div class="clinics-hero-banner">
+          <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1.5rem;">
+            <div>
+              <span class="clay-badge clay-badge-matcha" style="margin-bottom: 0.75rem;">מרחבי טיפול וספא מובחרים</span>
+              <h1 style="margin-bottom: 0.5rem;">קליניקות ומתחמי ספא להשכרה ואירוח</h1>
+              <p style="font-size: 1.05rem; max-width: 650px; margin-bottom: 1.25rem;">
+                מרחבים טיפוליים מאובזרים וחדרי טיפול שקטים לפי שעה למטפלים מוסמכים, ומתחמי ספא מרגיעים לחווית גוף-נפש מושלמת.
+              </p>
+              <div style="display: flex; gap: 0.75rem; flex-wrap: wrap;">
+                <button class="clay-btn clay-btn-primary" data-nav="clinic-publish">
+                  <span>🏰 פרסום קליניקה / ספא חדש</span>
+                </button>
+              </div>
+            </div>
+            <div style="font-size: 4.5rem; user-select: none;" aria-hidden="true">
+              🪷
+            </div>
+          </div>
+        </div>
+
+        <!-- Filter Panel -->
+        <div class="clay-card" style="padding: 1.5rem; margin-bottom: 2rem;">
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; align-items: flex-end;">
+            <div>
+              <label class="filter-label" for="clinic-search-input">חיפוש חופשי</label>
+              <input type="text" id="clinic-search-input" class="clay-input" placeholder="שם הקליניקה, עיר, מתקן..." value="${filters.query || ''}" />
+            </div>
+
+            <div>
+              <label class="filter-label" for="clinic-city-select">אזור / עיר</label>
+              <select id="clinic-city-select" class="clay-select">
+                <option value="all">כל הארץ</option>
+                <option value="חיפה" ${filters.city === 'חיפה' ? 'selected' : ''}>חיפה והצפון</option>
+                <option value="תל אביב" ${filters.city === 'תל אביב' ? 'selected' : ''}>תל אביב והמרכז</option>
+                <option value="ירושלים" ${filters.city === 'ירושלים' ? 'selected' : ''}>ירושלים והסביבה</option>
+                <option value="ראשון לציון" ${filters.city === 'ראשון לציון' ? 'selected' : ''}>ראשון לציון והשפלה</option>
+                <option value="באר שבע" ${filters.city === 'באר שבע' ? 'selected' : ''}>באר שבע והדרום</option>
+                <option value="נתניה" ${filters.city === 'נתניה' ? 'selected' : ''}>נתניה והשרון</option>
+              </select>
+            </div>
+
+            <div>
+              <label class="filter-label" for="clinic-type-select">סוג המתחם</label>
+              <select id="clinic-type-select" class="clay-select">
+                <option value="all">כל הסוגים</option>
+                <option value="spa-center" ${filters.type === 'spa-center' ? 'selected' : ''}>מרכז ספא הוליסטי וקליניקות</option>
+                <option value="clinic-rental" ${filters.type === 'clinic-rental' ? 'selected' : ''}>קליניקה שיתופית מאובזרת</option>
+                <option value="holistic-complex" ${filters.type === 'holistic-complex' ? 'selected' : ''}>מרחב קליניקות וספא משולב</option>
+              </select>
+            </div>
+
+            <div>
+              <button type="button" id="btn-reset-clinic-filters" class="clay-btn" style="width: 100%; height: 46px;">
+                <span>איפוס סינונים</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Results Counter -->
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem;">
+          <h2 style="font-size: 1.35rem;">נמצאו ${clinics.length} מתחמים זמינים</h2>
+          <span style="font-size: 0.9rem; color: var(--color-text-muted);">השכרה לפי שעה או חבילות אירוח</span>
+        </div>
+
+        <!-- Clinics Grid -->
+        ${clinics.length > 0 ? `
+          <div class="clinics-grid">
+            ${clinics.map(c => `
+              <article class="clinic-card">
+                <div class="clinic-card-img-wrap">
+                  <img src="${c.coverImage || (c.images && c.images[0]) || 'https://images.unsplash.com/photo-1540555700478-4be289fbecef?auto=format&fit=crop&w=600&q=80'}" 
+                       alt="${c.name}" 
+                       class="clinic-card-img" />
+                  <span class="clinic-card-badge">${c.typeLabel || 'מתחם טיפולים וספא'}</span>
+                  <span class="clinic-card-rating">
+                    <span style="color: #DFC697;">★</span>
+                    <span>${c.rating || 4.9}</span>
+                  </span>
+                </div>
+
+                <div class="clinic-card-body">
+                  <h3 style="font-size: 1.25rem; margin-bottom: 0.35rem;">${c.name}</h3>
+                  <div style="display: flex; align-items: center; gap: 0.4rem; font-size: 0.88rem; color: var(--color-text-muted); margin-bottom: 0.65rem;">
+                    <span>📍</span>
+                    <span>${c.address || c.city}</span>
+                  </div>
+
+                  <p style="font-size: 0.88rem; line-height: 1.45; margin-bottom: 0.85rem; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">
+                    ${c.description}
+                  </p>
+
+                  <div class="clinic-amenities-tags">
+                    ${(c.amenities || []).slice(0, 4).map(a => `<span class="clinic-amenity-tag">${a}</span>`).join('')}
+                    ${(c.amenities || []).length > 4 ? `<span class="clinic-amenity-tag">+${c.amenities.length - 4} נוספים</span>` : ''}
+                  </div>
+
+                  <div class="clinic-pricing-strip">
+                    <div>
+                      <span style="font-size: 0.78rem; display: block; color: var(--color-text-muted);">השכרה למטפלים</span>
+                      <strong>₪${c.hourlyRent || 80}</strong> <span style="font-size: 0.8rem;">/ שעה</span>
+                    </div>
+                    <div style="text-align: left;">
+                      <span style="font-size: 0.78rem; display: block; color: var(--color-text-muted);">חבילת ספא/אורח</span>
+                      <strong>₪${c.spaPackagePrice || 350}</strong>
+                    </div>
+                  </div>
+
+                  <div style="display: flex; gap: 0.5rem; margin-top: auto;">
+                    <button class="clay-btn clay-btn-primary" style="flex: 1;" data-nav="clinic-profile" data-clinic-id="${c.id}">
+                      <span>צפייה בפרטים והזמנה</span>
+                    </button>
+                    <a href="https://wa.me/972${(c.whatsapp || c.phone || '0520000000').replace(/[^0-9]/g, '').replace(/^0/, '')}?text=${encodeURIComponent('שלום, פונה דרך אתר שלווה לגבי ' + c.name)}" 
+                       target="_blank" 
+                       rel="noopener" 
+                       class="clay-btn" 
+                       style="display: flex; align-items: center; justify-content: center; width: 44px; padding: 0;" 
+                       title="שליחת וואטסאפ מהיר">
+                      <span style="font-size: 1.15rem;">💬</span>
+                    </a>
+                    <a href="tel:${c.phone || '03-5555555'}" 
+                       class="clay-btn" 
+                       style="display: flex; align-items: center; justify-content: center; width: 44px; padding: 0;" 
+                       title="חיוג טלפוני">
+                      <span style="font-size: 1.15rem;">📞</span>
+                    </a>
+                  </div>
+                </div>
+              </article>
+            `).join('')}
+          </div>
+        ` : `
+          <div class="clay-card" style="padding: 3.5rem; text-align: center; margin: 2rem auto; max-width: 600px;">
+            <div style="font-size: 3.5rem; margin-bottom: 1rem;">🏰</div>
+            <h3>לא נמצאו מתחמים התואמים את הסינון</h3>
+            <p style="margin: 0.75rem 0 1.5rem;">
+              נסו לאפס את הסינונים או לפרסם את הקליניקה שלכם באתר.
+            </p>
+            <button class="clay-btn clay-btn-primary" id="btn-clear-empty-filters">
+              <span>איפוס סינונים</span>
+            </button>
+          </div>
+        `}
+      </div>
+    `;
+  }
+
+  bindClinicsEvents() {
+    const searchInput = document.getElementById('clinic-search-input');
+    const citySelect = document.getElementById('clinic-city-select');
+    const typeSelect = document.getElementById('clinic-type-select');
+    const resetBtn = document.getElementById('btn-reset-clinic-filters');
+    const emptyResetBtn = document.getElementById('btn-clear-empty-filters');
+
+    const updateFilters = () => {
+      const filters = {
+        query: searchInput ? searchInput.value : '',
+        city: citySelect ? citySelect.value : 'all',
+        type: typeSelect ? typeSelect.value : 'all',
+        maxPrice: 600
+      };
+      appState.set('clinicFilters', filters);
+      this.render();
+    };
+
+    searchInput?.addEventListener('input', () => {
+      clearTimeout(this._clinicSearchTimeout);
+      this._clinicSearchTimeout = setTimeout(updateFilters, 350);
+    });
+
+    citySelect?.addEventListener('change', updateFilters);
+    typeSelect?.addEventListener('change', updateFilters);
+
+    const reset = () => {
+      appState.set('clinicFilters', { query: '', city: 'all', type: 'all', maxPrice: 600 });
+      this.render();
+    };
+    resetBtn?.addEventListener('click', reset);
+    emptyResetBtn?.addEventListener('click', reset);
+  }
+
+  /* ========================================================================
+     Clinic / Spa Detailed Profile View
+     ======================================================================== */
+  renderClinicProfileView() {
+    const clinicId = appState.get('selectedClinicId') || 'clinic-1';
+    const clinic = appState.getClinic(clinicId) || appState.getClinics()[0];
+    const images = clinic.images && clinic.images.length > 0 ? clinic.images : [clinic.coverImage];
+
+    return `
+      <div class="container" style="padding: 2rem 0 4rem;">
+        <button class="clay-btn clay-btn-sm" data-nav="clinics" style="margin-bottom: 1.5rem;">
+          <span>← חזרה לרשימת הקליניקות והספא</span>
+        </button>
+
+        <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 2rem; align-items: flex-start;">
+          <!-- Main Left Column -->
+          <div>
+            <!-- Gallery Hero -->
+            <div style="margin-bottom: 1.5rem;">
+              <img id="clinic-main-photo" src="${clinic.coverImage || images[0]}" alt="${clinic.name}" class="clinic-gallery-hero" />
+              ${images.length > 1 ? `
+                <div class="clinic-gallery-thumbs">
+                  ${images.map((img, idx) => `
+                    <img src="${img}" alt="${clinic.name} תמונה ${idx + 1}" class="clinic-gallery-thumb ${idx === 0 ? 'active' : ''}" data-gallery-img="${img}" />
+                  `).join('')}
+                </div>
+              ` : ''}
+            </div>
+
+            <!-- Clinic Overview Card -->
+            <div class="clay-card" style="padding: 2rem; margin-bottom: 1.75rem;">
+              <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 0.75rem;">
+                <span class="clay-badge clay-badge-matcha">${clinic.typeLabel || 'מתחם ספא וקליניקות'}</span>
+                <span class="clay-badge clay-badge-aqua">📍 ${clinic.city}</span>
+                <span class="clay-badge clay-badge-cream">⭐ ${clinic.rating || 4.9} (${clinic.reviewsCount || 1} ביקורות)</span>
+                ${clinic.isAccessible ? '<span class="clay-badge clay-badge-matcha">♿ נגיש לנכים</span>' : ''}
+              </div>
+
+              <h1 style="font-size: 2rem; margin-bottom: 0.5rem;">${clinic.name}</h1>
+              <p style="font-size: 1rem; color: var(--color-text-muted); margin-bottom: 1.5rem;">
+                📍 ${clinic.address}
+              </p>
+
+              <h3 style="margin-bottom: 0.75rem;">על המתחם והאווירה</h3>
+              <p style="font-size: 1.05rem; line-height: 1.7; margin-bottom: 1.5rem;">
+                ${clinic.description}
+              </p>
+
+              <h3 style="margin-bottom: 0.85rem;">שירותים, מתקנים ואבזור במתחם</h3>
+              <div class="clinic-amenity-grid">
+                ${(clinic.amenities || []).map(a => `
+                  <div class="clinic-amenity-item">
+                    <span>✨</span>
+                    <span>${a}</span>
+                  </div>
+                `).join('')}
+              </div>
+            </div>
+          </div>
+
+          <!-- Sticky Contact & Booking Sidebar -->
+          <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+            <div class="clay-card clay-card-matcha" style="padding: 2rem;">
+              <h3 style="margin-bottom: 1rem;">תיאום ביקור והשכרה</h3>
+              
+              <div style="background: rgba(255,255,255,0.7); padding: 1.1rem; border-radius: 18px; margin-bottom: 1.25rem;">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                  <span style="font-size: 0.9rem;">השכרת חדר טיפולים:</span>
+                  <strong>₪${clinic.hourlyRent || 80} / שעה</strong>
+                </div>
+                <div style="display: flex; justify-content: space-between;">
+                  <span style="font-size: 0.9rem;">חבילת ספא/אורח:</span>
+                  <strong>₪${clinic.spaPackagePrice || 350} לאדם</strong>
+                </div>
+              </div>
+
+              <div style="display: flex; flex-direction: column; gap: 0.75rem; margin-bottom: 1.5rem;">
+                <a href="https://wa.me/972${(clinic.whatsapp || clinic.phone || '0520000000').replace(/[^0-9]/g, '').replace(/^0/, '')}?text=${encodeURIComponent('שלום, אני פונה מאתר שלווה ומתעניין/ת בתיאום ב-' + clinic.name)}" 
+                   target="_blank" 
+                   rel="noopener" 
+                   class="clay-btn clay-btn-primary" 
+                   style="width: 100%; display: flex; align-items: center; justify-content: center; gap: 0.6rem; text-decoration: none;">
+                  <span style="font-size: 1.2rem;">💬</span>
+                  <span>תיאום ישיר בוואטסאפ</span>
+                </a>
+
+                <a href="tel:${clinic.phone || '03-5555555'}" 
+                   class="clay-btn" 
+                   style="width: 100%; display: flex; align-items: center; justify-content: center; gap: 0.6rem; text-decoration: none;">
+                  <span style="font-size: 1.1rem;">📞</span>
+                  <span>חיוג טלפוני: ${clinic.phone || 'צור קשר'}</span>
+                </a>
+
+                <a href="mailto:${clinic.email || 'info@shalva.co.il'}?subject=${encodeURIComponent('פנייה מאתר שלווה - ' + clinic.name)}" 
+                   class="clay-btn" 
+                   style="width: 100%; display: flex; align-items: center; justify-content: center; gap: 0.6rem; text-decoration: none;">
+                  <span style="font-size: 1.1rem;">✉️</span>
+                  <span>שליחת אימייל</span>
+                </a>
+              </div>
+
+              <hr style="border: none; border-top: 1px dashed rgba(128,126,121,0.25); margin-bottom: 1.25rem;" />
+
+              <!-- Quick Inquiry Form -->
+              <div>
+                <strong style="display: block; font-size: 1rem; margin-bottom: 0.75rem;">השארת פנייה מהירה למתחם:</strong>
+                <form id="clinic-inquiry-form" style="display: flex; flex-direction: column; gap: 0.75rem;">
+                  <input type="text" id="inquiry-name" class="clay-input" placeholder="שמך המלא *" required />
+                  <input type="tel" id="inquiry-phone" class="clay-input" placeholder="מספר טלפון לחזרה *" required />
+                  <textarea id="inquiry-message" class="clay-textarea" rows="3" placeholder="האם מעוניינ/ת בהשכרת שעות כמטפל/ת או בטיפול ספא?"></textarea>
+                  <button type="submit" class="clay-btn clay-btn-primary" style="width: 100%;">
+                    <span>שלח פנייה למתחם</span>
+                  </button>
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  bindClinicProfileEvents() {
+    // Gallery thumbnails click
+    const mainPhoto = document.getElementById('clinic-main-photo');
+    document.querySelectorAll('[data-gallery-img]').forEach(thumb => {
+      thumb.addEventListener('click', () => {
+        const url = thumb.getAttribute('data-gallery-img');
+        if (mainPhoto) mainPhoto.src = url;
+        document.querySelectorAll('.clinic-gallery-thumb').forEach(t => t.classList.remove('active'));
+        thumb.classList.add('active');
+      });
+    });
+
+    // Inquiry form
+    const form = document.getElementById('clinic-inquiry-form');
+    form?.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const name = document.getElementById('inquiry-name')?.value.trim();
+      const phone = document.getElementById('inquiry-phone')?.value.trim();
+      if (!name || !phone) {
+        this.showToast('נא למלא שם וטלפון ⚠️');
+        return;
+      }
+      this.showToast('פנייתך נשלחה ישירות למנהל המתחם! יחזרו אליך בהקדם 🌿✨');
+      form.reset();
+    });
+  }
+
+  /* ========================================================================
+     Clinic & Spa Publishing / Advertising Screen
+     ======================================================================== */
+  renderClinicPublishView() {
+    return `
+      <div class="container" style="padding: 2rem 0 4rem; max-width: 820px;">
+        <div style="margin-bottom: 2rem;">
+          <span class="clay-badge clay-badge-matcha" style="margin-bottom: 0.5rem;">פרסום ואירוח בשלווה</span>
+          <h1>פרסום קליניקה או מתחם ספא</h1>
+          <p>הציעו את חדרי הטיפולים או מתקני הספא שלכם לאלפי מטפלים מוסמכים ומטופלים מכל רחבי הארץ</p>
+        </div>
+
+        <form id="clinic-publish-form" class="clay-card" style="padding: 2.2rem; display: flex; flex-direction: column; gap: 1.75rem;" novalidate>
+          
+          <!-- Basic Details -->
+          <div>
+            <label class="filter-label" for="pub-clinic-name">שם הקליניקה / מרכז הספא *</label>
+            <input type="text" id="pub-clinic-name" class="clay-input" placeholder="לדוגמה: מרחצאות רמת השרון, קליניקת בוטיק מוריה..." required />
+          </div>
+
+          <!-- Type -->
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+            <div>
+              <label class="filter-label" for="pub-clinic-type">סוג המתחם *</label>
+              <select id="pub-clinic-type" class="clay-select">
+                <option value="spa-center">מרכז ספא הוליסטי וקליניקות</option>
+                <option value="clinic-rental">קליניקה שיתופית מאובזרת למטפלים</option>
+                <option value="holistic-complex">מרחב קליניקות וספא משולב</option>
+              </select>
+            </div>
+            <div>
+              <label class="filter-label" for="pub-clinic-city">עיר / יישוב *</label>
+              <input type="text" id="pub-clinic-city" class="clay-input" placeholder="תל אביב, חיפה, ירושלים..." required />
+            </div>
+          </div>
+
+          <div>
+            <label class="filter-label" for="pub-clinic-address">כתובת מלאה *</label>
+            <input type="text" id="pub-clinic-address" class="clay-input" placeholder="רחוב ומספר בית, קומה, פרטי הגעה..." required />
+          </div>
+
+          <!-- Contact Details -->
+          <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem;">
+            <div>
+              <label class="filter-label" for="pub-clinic-phone">טלפון להתקשרות *</label>
+              <input type="tel" id="pub-clinic-phone" class="clay-input" placeholder="03-1234567" required />
+            </div>
+            <div>
+              <label class="filter-label" for="pub-clinic-whatsapp">מספר וואטסאפ *</label>
+              <input type="tel" id="pub-clinic-whatsapp" class="clay-input" placeholder="052-1234567" required />
+            </div>
+            <div>
+              <label class="filter-label" for="pub-clinic-email">דוא״ל *</label>
+              <input type="email" id="pub-clinic-email" class="clay-input" placeholder="clinic@shalva.co.il" required />
+            </div>
+          </div>
+
+          <!-- Pricing -->
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+            <div>
+              <label class="filter-label" for="pub-hourly-rent">מחיר השכרה לשעה למטפלים (₪) *</label>
+              <input type="number" id="pub-hourly-rent" class="clay-input" value="80" min="40" max="300" required />
+            </div>
+            <div>
+              <label class="filter-label" for="pub-spa-price">מחיר כניסה / חבילת ספא לאורח (₪)</label>
+              <input type="number" id="pub-spa-price" class="clay-input" value="380" min="150" max="1500" />
+            </div>
+          </div>
+
+          <!-- Multi-Image Uploader for Clinic -->
+          <div class="avatar-uploader-card">
+            <strong style="font-size: 1.15rem; display: block; margin-bottom: 0.35rem;">
+              📸 תמונות המתחם וחדרי הטיפול
+            </strong>
+            <p style="font-size: 0.9rem; color: var(--color-text-muted); margin-bottom: 1.25rem;">
+              העלו תמונות איכותיות של הקליניקה, הספא, חדרי הטיפולים ואזורי ההמתנה (מהמחשב/נייד, מענן או מגלריית שלווה).
+            </p>
+
+            <div style="display: flex; gap: 0.75rem; flex-wrap: wrap; margin-bottom: 1rem;">
+              <input type="file" id="pub-file-input" multiple accept="image/png, image/jpeg, image/webp" style="display: none;" />
+              <button type="button" class="clay-btn clay-btn-primary" id="btn-pub-browse-files">
+                <span>💻 בחירת תמונות מהמחשב/נייד</span>
+              </button>
+            </div>
+
+            <!-- Cloud URL Input -->
+            <div style="background: rgba(255,255,255,0.7); padding: 1.1rem; border-radius: 18px; margin-bottom: 1.25rem;">
+              <label for="pub-cloud-url-input" style="font-weight: 700; font-size: 0.9rem; display: block; margin-bottom: 0.4rem;">
+                ☁️ הדבקת קישור ישיר לתמונה (Google Drive, Dropbox, רשת)
+              </label>
+              <div class="cloud-url-box">
+                <input type="url" id="pub-cloud-url-input" class="clay-input" placeholder="https://..." />
+                <button type="button" class="clay-btn" id="btn-pub-add-cloud-url">
+                  <span>הוסף תמונה</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Preset Spa Images Gallery -->
+            <div style="margin-bottom: 1.25rem;">
+              <strong style="font-size: 0.9rem; display: block; margin-bottom: 0.45rem;">
+                🏛️ או הוסיפו תמונות איכותיות ממאגר הספא של שלווה:
+              </strong>
+              <div style="display: flex; gap: 0.65rem; overflow-x: auto; padding: 0.5rem 0;">
+                <img src="https://images.unsplash.com/photo-1540555700478-4be289fbecef?auto=format&fit=crop&w=300&q=80" 
+                     class="clinic-gallery-thumb" data-preset-spa-img="https://images.unsplash.com/photo-1540555700478-4be289fbecef?auto=format&fit=crop&w=800&q=80" title="לחץ להוספה" />
+                <img src="https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?auto=format&fit=crop&w=300&q=80" 
+                     class="clinic-gallery-thumb" data-preset-spa-img="https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?auto=format&fit=crop&w=800&q=80" title="לחץ להוספה" />
+                <img src="https://images.unsplash.com/photo-1544161515-4ab6ce6db874?auto=format&fit=crop&w=300&q=80" 
+                     class="clinic-gallery-thumb" data-preset-spa-img="https://images.unsplash.com/photo-1544161515-4ab6ce6db874?auto=format&fit=crop&w=800&q=80" title="לחץ להוספה" />
+                <img src="https://images.unsplash.com/photo-1515377905703-c4788e51af15?auto=format&fit=crop&w=300&q=80" 
+                     class="clinic-gallery-thumb" data-preset-spa-img="https://images.unsplash.com/photo-1515377905703-c4788e51af15?auto=format&fit=crop&w=800&q=80" title="לחץ להוספה" />
+                <img src="https://images.unsplash.com/photo-1600334129128-685c5582fd35?auto=format&fit=crop&w=300&q=80" 
+                     class="clinic-gallery-thumb" data-preset-spa-img="https://images.unsplash.com/photo-1600334129128-685c5582fd35?auto=format&fit=crop&w=800&q=80" title="לחץ להוספה" />
+              </div>
+            </div>
+
+            <!-- Uploaded Thumbnails Preview -->
+            <div>
+              <strong style="font-size: 0.9rem; display: block; margin-bottom: 0.35rem;">
+                תמונות שנבחרו (<span id="pub-photos-count">2</span>):
+              </strong>
+              <div id="pub-photos-grid" class="clinic-multi-thumbs">
+                <!-- Injected via JavaScript -->
+              </div>
+            </div>
+          </div>
+
+          <!-- Description -->
+          <div>
+            <label class="filter-label" for="pub-clinic-desc">תיאור מפורט של המתחם, האווירה והציוד *</label>
+            <textarea id="pub-clinic-desc" class="clay-textarea" rows="4" placeholder="תארו את העיצוב, השקט, הנגישות, שעות הפעילות ומה שמייחד את המרחב שלכם..." required></textarea>
+          </div>
+
+          <!-- Amenities Checkboxes -->
+          <div>
+            <strong style="display: block; font-size: 1rem; margin-bottom: 0.75rem;">מתקנים ואבזור במתחם (סמנו את כל המתאים):</strong>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 0.75rem;">
+              <label class="clay-switch-label">
+                <input type="checkbox" class="clay-switch-checkbox pub-amenity" value="חניה צמודה חופשית" checked />
+                <div class="clay-switch"><div class="clay-switch-thumb"></div></div>
+                <span>🚗 חניה צמודה חופשית</span>
+              </label>
+
+              <label class="clay-switch-label">
+                <input type="checkbox" class="clay-switch-checkbox pub-amenity" value="מונגש מלא לנכים" checked />
+                <div class="clay-switch"><div class="clay-switch-thumb"></div></div>
+                <span>♿ נגישות מלאה לנכים</span>
+              </label>
+
+              <label class="clay-switch-label">
+                <input type="checkbox" class="clay-switch-checkbox pub-amenity" value="סאונה פינית" />
+                <div class="clay-switch"><div class="clay-switch-thumb"></div></div>
+                <span>🧖‍♀️ סאונה פינית יבשה</span>
+              </label>
+
+              <label class="clay-switch-label">
+                <input type="checkbox" class="clay-switch-checkbox pub-amenity" value="ג'קוזי ענק" />
+                <div class="clay-switch"><div class="clay-switch-thumb"></div></div>
+                <span>🛁 ג'קוזי הידרותרפיה</span>
+              </label>
+
+              <label class="clay-switch-label">
+                <input type="checkbox" class="clay-switch-checkbox pub-amenity" value="מיטות טיפול חשמליות" checked />
+                <div class="clay-switch"><div class="clay-switch-thumb"></div></div>
+                <span>🛏️ מיטות טיפול חשמליות</span>
+              </label>
+
+              <label class="clay-switch-label">
+                <input type="checkbox" class="clay-switch-checkbox pub-amenity" value="חדר מלח טיפולי" />
+                <div class="clay-switch"><div class="clay-switch-thumb"></div></div>
+                <span>🧂 חדר מלח טיפולי</span>
+              </label>
+
+              <label class="clay-switch-label">
+                <input type="checkbox" class="clay-switch-checkbox pub-amenity" value="פינת תה צמחים וכיבוד" checked />
+                <div class="clay-switch"><div class="clay-switch-thumb"></div></div>
+                <span>☕ פינת תה וכיבוד</span>
+              </label>
+
+              <label class="clay-switch-label">
+                <input type="checkbox" class="clay-switch-checkbox pub-amenity" value="מקלחות וחלוקי כותנה" />
+                <div class="clay-switch"><div class="clay-switch-thumb"></div></div>
+                <span>🚿 מקלחות וחלוקי כותנה</span>
+              </label>
+
+              <label class="clay-switch-label">
+                <input type="checkbox" class="clay-switch-checkbox pub-amenity" value="WiFi ומוזיקת ספא" checked />
+                <div class="clay-switch"><div class="clay-switch-thumb"></div></div>
+                <span>📶 WiFi ומוזיקת ספא</span>
+              </label>
+            </div>
+          </div>
+
+          <!-- Weekend Availability -->
+          <label class="clay-switch-label">
+            <input type="checkbox" id="pub-weekend-toggle" class="clay-switch-checkbox" checked />
+            <div class="clay-switch"><div class="clay-switch-thumb"></div></div>
+            <span>המתחם פתוח לקבלת מטופלים והשכרה גם בסופי שבוע (שישי/שבת)</span>
+          </label>
+
+          <button type="submit" class="clay-btn clay-btn-primary clay-btn-lg" style="margin-top: 1rem;">
+            <span>פרסם את הקליניקה / הספא באתר שלווה ✨</span>
+          </button>
+        </form>
+      </div>
+    `;
+  }
+
+  bindClinicPublishEvents() {
+    let uploadedPhotos = [
+      'https://images.unsplash.com/photo-1540555700478-4be289fbecef?auto=format&fit=crop&w=800&q=80',
+      'https://images.unsplash.com/photo-1544161515-4ab6ce6db874?auto=format&fit=crop&w=800&q=80'
+    ];
+
+    const photosGrid = document.getElementById('pub-photos-grid');
+    const photosCount = document.getElementById('pub-photos-count');
+    const fileInput = document.getElementById('pub-file-input');
+    const browseBtn = document.getElementById('btn-pub-browse-files');
+    const cloudInput = document.getElementById('pub-cloud-url-input');
+    const addCloudBtn = document.getElementById('btn-pub-add-cloud-url');
+
+    const renderPhotos = () => {
+      if (!photosGrid) return;
+      photosGrid.innerHTML = uploadedPhotos.map((url, idx) => `
+        <div class="clinic-multi-thumb-wrap">
+          <img src="${url}" alt="תמונה ${idx + 1}" />
+          <button type="button" class="clinic-multi-thumb-delete" data-del-photo="${idx}" title="הסר תמונה">✕</button>
+        </div>
+      `).join('');
+      if (photosCount) photosCount.textContent = uploadedPhotos.length;
+
+      // Bind delete buttons
+      photosGrid.querySelectorAll('[data-del-photo]').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          e.preventDefault();
+          const idx = parseInt(btn.getAttribute('data-del-photo'), 10);
+          uploadedPhotos.splice(idx, 1);
+          renderPhotos();
+        });
+      });
+    };
+
+    renderPhotos();
+
+    // Trigger file picker
+    browseBtn?.addEventListener('click', () => fileInput?.click());
+
+    // File input handling with canvas resize
+    fileInput?.addEventListener('change', (e) => {
+      const files = Array.from(e.target.files || []);
+      if (!files.length) return;
+
+      files.forEach(file => {
+        if (!file.type.startsWith('image/')) return;
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+          const img = new Image();
+          img.onload = () => {
+            const maxDim = 800;
+            let width = img.width;
+            let height = img.height;
+            if (width > height) {
+              if (width > maxDim) {
+                height = Math.round((height * maxDim) / width);
+                width = maxDim;
+              }
+            } else {
+              if (height > maxDim) {
+                width = Math.round((width * maxDim) / height);
+                height = maxDim;
+              }
+            }
+            const canvas = document.createElement('canvas');
+            canvas.width = width;
+            canvas.height = height;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0, width, height);
+            const compressed = canvas.toDataURL('image/jpeg', 0.82);
+            uploadedPhotos.push(compressed);
+            renderPhotos();
+          };
+          img.src = ev.target.result;
+        };
+        reader.readAsDataURL(file);
+      });
+      this.showToast('התמונות מהמחשב נוספו בהצלחה! 📸');
+    });
+
+    // Cloud URL loader
+    addCloudBtn?.addEventListener('click', () => {
+      let url = cloudInput ? cloudInput.value.trim() : '';
+      if (!url) {
+        this.showToast('נא להזין קישור לתמונה');
+        return;
+      }
+      const gDriveMatch = url.match(/\/d\/([a-zA-Z0-9_-]+)/);
+      if (gDriveMatch && gDriveMatch[1]) {
+        url = `https://drive.google.com/thumbnail?id=${gDriveMatch[1]}&sz=w800`;
+      } else if (url.includes('dropbox.com')) {
+        url = url.replace('dl=0', 'raw=1');
+      }
+
+      uploadedPhotos.push(url);
+      renderPhotos();
+      if (cloudInput) cloudInput.value = '';
+      this.showToast('התמונה מהענן נוספה בהצלחה! ☁️');
+    });
+
+    // Preset spa images
+    document.querySelectorAll('[data-preset-spa-img]').forEach(img => {
+      img.addEventListener('click', () => {
+        const url = img.getAttribute('data-preset-spa-img');
+        if (!uploadedPhotos.includes(url)) {
+          uploadedPhotos.push(url);
+          renderPhotos();
+          this.showToast('התמונה נוספה מהמאגר! 🏛️');
+        }
+      });
+    });
+
+    // Form submission
+    const form = document.getElementById('clinic-publish-form');
+    form?.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const name = document.getElementById('pub-clinic-name')?.value.trim();
+      const type = document.getElementById('pub-clinic-type')?.value;
+      const city = document.getElementById('pub-clinic-city')?.value.trim();
+      const address = document.getElementById('pub-clinic-address')?.value.trim();
+      const phone = document.getElementById('pub-clinic-phone')?.value.trim();
+      const whatsapp = document.getElementById('pub-clinic-whatsapp')?.value.trim();
+      const email = document.getElementById('pub-clinic-email')?.value.trim();
+      const hourlyRent = parseInt(document.getElementById('pub-hourly-rent')?.value, 10) || 80;
+      const spaPackagePrice = parseInt(document.getElementById('pub-spa-price')?.value, 10) || 380;
+      const description = document.getElementById('pub-clinic-desc')?.value.trim();
+      const weekendAvailability = document.getElementById('pub-weekend-toggle')?.checked || false;
+
+      if (!name || !city || !address || !phone || !description) {
+        this.showToast('נא למלא את כל שדות החובה המסומנים בכוכבית (*) ⚠️');
+        return;
+      }
+
+      // Collect selected amenities
+      const amenities = Array.from(document.querySelectorAll('.pub-amenity:checked')).map(el => el.value);
+
+      const typeLabelMap = {
+        'spa-center': 'מרכז ספא הוליסטי וקליניקות',
+        'clinic-rental': 'קליניקה שיתופית מאובזרת למטפלים',
+        'holistic-complex': 'מרחב קליניקות וספא משולב'
+      };
+
+      const newClinic = appState.addClinic({
+        name,
+        type,
+        typeLabel: typeLabelMap[type] || 'מרכז ספא וקליניקות',
+        city,
+        address,
+        phone,
+        whatsapp: whatsapp || phone,
+        email: email || 'contact@shalva.co.il',
+        hourlyRent,
+        spaPackagePrice,
+        coverImage: uploadedPhotos[0] || 'https://images.unsplash.com/photo-1540555700478-4be289fbecef?auto=format&fit=crop&w=800&q=80',
+        images: uploadedPhotos.length > 0 ? uploadedPhotos : ['https://images.unsplash.com/photo-1540555700478-4be289fbecef?auto=format&fit=crop&w=800&q=80'],
+        description,
+        amenities: amenities.length > 0 ? amenities : ['חדרי טיפול מאובזרים', 'מונגש לנכים', 'WiFi מהיר'],
+        isAccessible: amenities.includes('מונגש מלא לנכים'),
+        hasParking: amenities.includes('חניה צמודה חופשית'),
+        weekendAvailability
+      });
+
+      this.showToast('הקליניקה / הספא פורסמו בהצלחה ונוספו למאגר שלווה! 🏰✨');
+      this.navigate('clinic-profile', { clinicId: newClinic.id });
     });
   }
 
@@ -1691,7 +2761,7 @@ class AppController {
      ======================================================================== */
   renderFavoritesView() {
     const favIds = appState.get('favorites') || [];
-    const favTherapists = APP_DATA.therapists.filter(t => favIds.includes(t.id));
+    const favTherapists = (appState.getTherapists() || []).filter(t => favIds.includes(t.id));
 
     return `
       <div class="container" style="padding: 2rem 0 4rem;">
@@ -1980,7 +3050,7 @@ class AppController {
      Booking Modal
      ======================================================================== */
   openBookingModal(therapistId) {
-    const therapist = APP_DATA.therapists.find(t => t.id === therapistId) || APP_DATA.therapists[0];
+    const therapist = appState.getTherapist(therapistId);
     const isOnline = appState.isTherapistAvailable(therapist.id);
     if (!isOnline) {
       this.showToast('המטפל/ת אינו זמין/ה כרגע לתיאום פגישות חדשות');
